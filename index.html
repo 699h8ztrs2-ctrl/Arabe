@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Arabe">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0b0b">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Arabe littéraire</title>
+<style>
+:root{--bg:#faf8f4;--card:#fff;--tx:#1f2420;--mu:#6b716c;--ac:#2f6f5e;--ok:#2e8b57;--ko:#c0392b;--bd:#e3ded4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161a18;--card:#202522;--tx:#eceee9;--mu:#9aa29c;--ac:#5fb59f;--ok:#4cc38a;--ko:#e5766a;--bd:#323934;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:480px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0 12px}
+.tabs{display:flex;gap:6px;margin-bottom:16px}
+.tabs button{flex:1;padding:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-size:14px}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:28px;font-weight:600;cursor:pointer;user-select:none}
+.card small{display:block;font-size:12px;font-weight:400;color:var(--mu);margin-top:10px}
+.row{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;padding:14px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:inherit;font-size:15px}
+.btn.ok{background:var(--ok);color:#fff;border:0}.btn.ko{background:var(--ko);color:#fff;border:0}
+.opt{display:block;width:100%;margin-top:10px;text-align:left}
+.opt.good{background:var(--ok);color:#fff;border-color:var(--ok)}.opt.bad{background:var(--ko);color:#fff;border-color:var(--ko)}
+.meta{display:flex;justify-content:space-between;color:var(--mu);font-size:13px;margin-bottom:8px}
+textarea{width:100%;min-height:200px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:12px;font:15px/1.4 ui-monospace,monospace}
+p.h{color:var(--mu);font-size:13px}
+.hide{display:none}
+.tabs.lv{margin-bottom:10px}.tabs.lv button{padding:8px;font-size:13px}
+.pick{display:flex;gap:8px;margin-bottom:10px}.pick select{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:inherit;font-size:14px}
+html:root:not([data-theme="x"]){--bg:#0b0b0b;--card:#202020;--tx:#fff;--mu:#9a9a9a;--ac:#2ecc71;--ok:#2ecc71;--ko:#ff6b61;--bd:#2c2c2c;color-scheme:dark}
+main{padding:12px 16px 120px}
+h1{text-align:center;font-size:20px;font-weight:600;margin:0 -16px 16px;padding:8px 0 14px;border-bottom:1px solid var(--bd)}
+.pick select{background:var(--card);border-radius:14px;padding:12px;font-weight:500}
+.meta{font-size:14px;margin:4px 4px 10px}
+.card{position:relative;background:var(--card);border:2px solid var(--ac);border-radius:22px;min-height:280px;font-size:30px;padding:48px 24px 28px}
+.card.back{color:var(--ac)}
+.card{flex-direction:column}
+.card[data-tag]::before{content:attr(data-tag);position:absolute;top:0;left:0;background:var(--ac);color:#0b0b0b;font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px 0 16px 0}
+.btn{border-radius:16px;padding:16px;font-weight:600;background:var(--card)}
+.btn.ok{background:var(--ac);color:#0b0b0b}
+.btn.ko{background:var(--card);color:var(--ko);border:1.5px solid var(--ko)}
+.opt{border-radius:16px;font-weight:500}
+.opt.good{background:var(--ac);color:#0b0b0b;border-color:var(--ac)}
+.opt.bad{background:var(--ko);color:#0b0b0b;border-color:var(--ko)}
+textarea{background:var(--card);border-radius:16px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;margin:0;gap:0;background:#141414;border-top:1px solid var(--bd);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+.tabs button{border:0;background:none;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;padding:6px 0;border-radius:12px}
+.tabs button.on{background:none;color:var(--ac)}
+.tabs svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card,.opt,textarea{unicode-bidi:plaintext}
+</style>
+</head>
+<body>
+<main>
+<h1>Cartes</h1>
+<div class="pick"><select id="lvs"><option value="1">Niveau 1</option><option value="2">Niveau 2</option><option value="3">Niveau 3</option><option value="0">Tous les niveaux</option></select><select id="sr"></select></div>
+<div class="tabs">
+<button id="t0" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M7 3h10"/></svg>Cartes</button><button id="t1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>QCM</button><button id="t2"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Ma liste</button>
+</div>
+
+<section id="v0">
+<div class="meta"><span id="c0"></span><span id="s0"></span></div>
+<div class="card" id="card"></div>
+<div class="row"><button class="btn ko" id="no">À revoir</button><button class="btn ok" id="yes">Je sais</button></div>
+<div class="row"><button class="btn" id="sw">⇄ Inverser le sens</button><button class="btn" id="sh">Mélanger</button></div>
+</section>
+
+<section id="v1" class="hide">
+<div class="meta"><span id="c1"></span><span id="s1"></span></div>
+<div class="card" id="q" style="cursor:default"></div>
+<div id="opts"></div>
+<div class="row"><button class="btn" id="nx" style="display:none">Suivant →</button></div>
+</section>
+
+<section id="v2" class="hide">
+<p class="h">Une paire par ligne : <b>mot ; traduction</b> (séparateur ; ou tabulation ou =). Colle ta liste depuis Notion, Excel ou Sheets.</p>
+<p class="h" id="lh"></p>
+<textarea id="ta" placeholder="mot ; traduction"></textarea>
+<div class="row"><button class="btn ok" id="save">Enregistrer</button><button class="btn" id="ex">Vider la liste</button></div>
+<p class="h" id="msg"></p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let deck=[],rev=false,i=0,flipped=false,order=[],score=0,tot=0,answered=false,qi=0;
+const SAMPLE="";
+const SAMPLE2="";
+let lvl=1,decks={1:[],2:[],3:[]},ser=0,done={},sers={},rs=0,rt=0;
+function load(){try{const d=localStorage.getItem("fc_deck2");if(d)decks[1]=JSON.parse(d)}catch(e){}if(!decks[1].length)decks[1]=parse(SAMPLE);try{const d2=localStorage.getItem("fc_deck_l2");if(d2)decks[2]=JSON.parse(d2)}catch(e){}if(!decks[2].length)decks[2]=parse(SAMPLE2);try{const d3=localStorage.getItem("fc_deck_l3");if(d3)decks[3]=JSON.parse(d3)}catch(e){}try{const l=localStorage.getItem("fc_lvl");if(l!==null)lvl=+l}catch(e){}try{sers=JSON.parse(localStorage.getItem("fc_ser")||"{}");done=JSON.parse(localStorage.getItem("fc_done")||"{}")}catch(e){}if(![0,1,2,3].includes(lvl))lvl=1;setDeck()}
+function saveSt(){try{localStorage.setItem("fc_ser",JSON.stringify(sers));localStorage.setItem("fc_done",JSON.stringify(done))}catch(e){}}
+function renderSer(){const N=Math.ceil(deck.length/10),box=$("sr");if(N<2)ser=0;box.innerHTML="";for(let n=0;n<=(N<2?0:N);n++){const o=document.createElement("option");o.value=n;const ok=lvl>0&&(done[lvl]||[]).includes(n);o.textContent=(n?"Série "+n+" ("+((n-1)*10+1)+"–"+Math.min(n*10,deck.length)+")":"Toutes les séries")+(ok?" ✓":"");box.appendChild(o)}box.disabled=N<2;box.value=ser}
+function pickSer(n){ser=n;sers[lvl]=n;saveSt();renderSer();reset()}
+function endRound(ok){rt++;if(ok)rs++;const nx=$("nx");nx.textContent="Suivant →";if(rt>=order.length){const pass=rs/rt>=0.8;if(pass&&ser>0&&lvl>0){done[lvl]=done[lvl]||[];if(!done[lvl].includes(ser))done[lvl].push(ser);saveSt();renderSer()}nx.textContent=rs+" / "+rt+(pass?" ✓ Bien joué !":" — recommence")+" · Suivant →";rs=0;rt=0}}
+function tagTxt(){return lvl===0?"Tous les niveaux":"Niveau "+lvl+(ser?" · Série "+ser:"")}
+function setDeck(){deck=lvl===0?decks[1].concat(decks[2],decks[3]):decks[lvl]}
+function fillTa(){const ro=lvl===0;$("ta").value=deck.map(d=>d.a+" ; "+d.b).join("\n");$("ta").disabled=ro;$("save").disabled=ro;$("lh").textContent=ro?"Choisis le niveau 1 ou 2 pour modifier une liste.":"Niveau "+lvl+" · "+deck.length+" mots"}
+function setLvl(n){lvl=n;try{localStorage.setItem("fc_lvl",n)}catch(e){}setDeck();$("lvs").value=n;ser=sers[n]||0;if(ser>Math.ceil(deck.length/10))ser=0;renderSer();fillTa();reset()}
+function persist(){try{localStorage.setItem(lvl===3?"fc_deck_l3":lvl===2?"fc_deck_l2":"fc_deck2",JSON.stringify(decks[lvl]))}catch(e){}}
+function parse(t){return t.split(/\r?\n/).map(l=>l.split(/\t|;|=/).map(s=>s.trim())).filter(a=>a.length>=2&&a[0]&&a[1]).map(a=>({a:a[0],b:a[1]}))}
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function reset(){order=shuffle(deck.map((_,k)=>k).filter(k=>!ser||Math.floor(k/10)+1===ser));i=0;rs=0;rt=0;flipped=false;score=0;tot=0;qi=0;drawCard();drawQ()}
+function drawCard(){if(!order.length){$("card").innerHTML="Aucun mot ici<small>Ajoute des mots dans « Ma liste »</small>";$("card").dataset.tag=tagTxt();$("c0").textContent="0 / 0";return}const d=deck[order[i%order.length]];
+$("card").innerHTML=(flipped?(rev?d.a:d.b):(rev?d.b:d.a))+"<small>"+(flipped?"réponse":"touche pour retourner")+"</small>";
+$("card").dataset.tag=tagTxt();$("card").classList.toggle("back",flipped);$("c0").textContent=(i%order.length+1)+" / "+order.length}
+function nextCard(){i++;flipped=false;drawCard()}
+function drawQ(){answered=false;$("nx").style.display="none";if(deck.length<4){$("q").textContent="Il faut au moins 4 mots pour le QCM.";$("opts").innerHTML="";return}
+const k=order[qi%order.length],d=deck[k];const ans=rev?d.a:d.b;
+const wrong=shuffle(deck.filter((_,j)=>j!==k).map(x=>rev?x.a:x.b).filter(x=>x!==ans));
+const ch=shuffle([ans,...[...new Set(wrong)].slice(0,3)]);
+$("q").dataset.tag=tagTxt();$("q").textContent=rev?d.b:d.a;$("opts").innerHTML="";
+ch.forEach(c=>{const b=document.createElement("button");b.className="btn opt";b.textContent=c;
+b.onclick=()=>{if(answered)return;answered=true;tot++;
+if(c===ans){b.classList.add("good");score++}else{b.classList.add("bad");[...$("opts").children].forEach(x=>{if(x.textContent===ans)x.classList.add("good")})}
+$("s1").textContent="Score : "+score+" / "+tot;$("nx").style.display="block";endRound(c===ans)};
+$("opts").appendChild(b)});
+$("c1").textContent=(qi%order.length+1)+" / "+order.length}
+function tab(n){document.querySelector("h1").textContent=["Cartes","QCM","Ma liste"][n];[0,1,2].forEach(k=>{$("v"+k).classList.toggle("hide",k!==n);$("t"+k).classList.toggle("on",k===n)})}
+$("t0").onclick=()=>tab(0);$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);
+$("card").onclick=()=>{flipped=!flipped;drawCard()};
+$("yes").onclick=nextCard;
+$("no").onclick=()=>{if(!order.length)return;order.push(order[i%order.length]);nextCard()};
+$("sw").onclick=()=>{rev=!rev;flipped=false;drawCard();drawQ()};
+$("sh").onclick=reset;
+$("nx").onclick=()=>{qi++;drawQ()};
+$("ex").onclick=()=>{$("ta").value=lvl===3?"":lvl===2?SAMPLE2:SAMPLE};
+$("save").onclick=()=>{const p=parse($("ta").value);if(!p.length){$("msg").textContent="Aucune paire valide trouvée.";return}
+decks[lvl]=p;setDeck();persist();done[lvl]=[];ser=0;sers[lvl]=0;saveSt();renderSer();reset();fillTa();$("msg").textContent=p.length+" mots enregistrés.";tab(0)};
+$("lvs").onchange=()=>setLvl(+$("lvs").value);$("sr").onchange=()=>pickSer(+$("sr").value);
+load();setLvl(lvl);
+</script>
+</body>
+</html>
