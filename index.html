@@ -216,6 +216,22 @@ body{background:linear-gradient(180deg,#060c21 0,#060c21 210px,rgba(6,12,33,0) 3
 #snm::placeholder,#sta::placeholder{color:var(--mu);opacity:.8}
 #sta{min-height:150px}
 .addS .btn,#sdel{display:block;width:100%;margin-top:10px}
+
+/* ===== textes longs (cours) ===== */
+.card.long{font-size:21px;line-height:1.45;font-weight:500;padding-left:22px;padding-right:22px}
+.card.long .w{display:block;max-width:100%;overflow-wrap:anywhere}
+.card.ar.long,.card.long.ar{font-size:34px;line-height:1.8}
+#q.long{font-size:18px;line-height:1.45}
+#q.ar.long{font-size:30px}
+.opt{white-space:normal;overflow-wrap:anywhere}
+
+/* ===== sauvegarde ===== */
+.bk .h{margin:0 0 10px}
+#bkl{color:var(--ac);font-size:13px}
+.bkp{margin-top:12px;color:var(--mu);font-size:14px}
+.bkp summary{cursor:pointer;padding:6px 0}
+.bkp textarea{min-height:90px;margin-top:8px;font-size:13px}
+#bkm{margin-top:10px;color:var(--ac)}
 </style>
 </head>
 <body>
@@ -248,13 +264,21 @@ body{background:linear-gradient(180deg,#060c21 0,#060c21 210px,rgba(6,12,33,0) 3
 <p class="h" id="lh"></p>
 <textarea id="ta" placeholder="قُلْ : dis"></textarea>
 <div class="row"><button class="btn ok" id="save">Enregistrer</button><button class="btn" id="ex">Liste d’origine</button></div>
-<button class="btn ko" id="sdel" style="display:none">Supprimer cette sourate</button>
+<button class="btn ko" id="sdel" style="display:none">Supprimer cette liste</button>
 <p class="h" id="msg"></p>
-<div class="addS"><h3>Ajouter une sourate</h3>
-<input id="snm" placeholder="Nom de la sourate (ex. Al Ikhlas)" autocomplete="off">
-<textarea id="sta" placeholder="Colle ta liste ici, même en vrac :&#10;- قُلْ : dis&#10;هُوَ Il&#10;Q : اللَّهُ  R : Allah"></textarea>
-<button class="btn ok" id="sadd">Ajouter la sourate</button>
+<div class="addS"><h3>Ajouter une sourate ou un cours</h3>
+<input id="snm" placeholder="Nom (ex. Al Ikhlas, Cours 3 – Les pronoms)" autocomplete="off">
+<textarea id="sta" placeholder="Colle tes questions-réponses ici, même en vrac, sans limite :&#10;- قُلْ : dis&#10;هُوَ Il&#10;Q : اللَّهُ  R : Allah"></textarea>
+<button class="btn ok" id="sadd">Ajouter</button>
 <p class="h" id="smsg"></p></div>
+<div class="addS bk"><h3>Sauvegarde</h3>
+<p class="h">Garde une copie de toute la progression (jours, statistiques, ✓, listes, cours). Si l’appli est supprimée ou réinstallée, tu récupères tout en un geste.</p>
+<p class="h" id="bkl"></p>
+<button class="btn ok" id="bks">Sauvegarder ma progression</button>
+<button class="btn" id="bkr">Restaurer une sauvegarde</button>
+<input type="file" id="bkf" accept=".json,application/json,text/plain" hidden>
+<details class="bkp"><summary>Ou coller un code de sauvegarde</summary><textarea id="bkt" placeholder="Colle ici le contenu du fichier de sauvegarde"></textarea><button class="btn" id="bkt2">Restaurer ce code</button></details>
+<p class="h" id="bkm"></p></div>
 </section>
 </main>
 <script>
@@ -271,8 +295,9 @@ let lvl=1,decks={1:[],2:[],3:[],4:[],5:[],6:[]},ser=0,done={},sers={},rs=0,rt=0,
 
 let customs=[];
 function ldCus(){try{customs=JSON.parse(localStorage.getItem("fc_custom")||"[]")}catch(e){customs=[]}if(!Array.isArray(customs))customs=[];customs.forEach(c=>{decks[c.id]=c.words||[];LN[c.id]=c.name})}
-function svCus(){try{localStorage.setItem("fc_custom",JSON.stringify(customs))}catch(e){}}
+function svCus(){try{localStorage.setItem("fc_custom",JSON.stringify(customs));return true}catch(e){return false}}
 function renderLvOpts(){const sel=$("lvs"),ord=[1,2,4,5,6].concat(customs.map(c=>c.id),[3,0]);sel.innerHTML="";ord.forEach(id=>{const o=document.createElement("option");o.value=id;o.textContent=LN[id];sel.appendChild(o)});sel.value=lvl}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]))}
 function capFr(t){return t.replace(/^([^A-Za-zÀ-ÖØ-öø-ÿ]*)([a-zà-öø-ÿ])/,(m,p,c)=>p+c.toUpperCase())}
 function smartParse(t){
 const ARC="\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF",AR=new RegExp("["+ARC+"]"),LAT=/[A-Za-zÀ-ÖØ-öø-ÿŒœ]/;
@@ -333,21 +358,21 @@ function bump(key,v){const t=dstr(new Date());if(!days.includes(t))days.push(t);
 function renderStats(){const ks=Object.values(stats.k);$("smA").textContent=ks.filter(x=>x>=1).length;$("smC").textContent=ks.filter(x=>x>=3).length;$("smB").textContent=stats.qt?Math.round(100*stats.qo/stats.qt)+"%":"—";const n=streak();$("stk").textContent=n+(n>1?" jours":" jour")}
 function tagTxt(){return lvl===0?"Tous les niveaux":LN[lvl]+(ser?" · Série "+ser:"")}
 function setDeck(){deck=lvl===0?decks[1].concat(decks[2],decks[4],decks[5],decks[6],...customs.map(c=>decks[c.id]||[]),decks[3]):(decks[lvl]||[])}
-function fillTa(){const ro=lvl===0;$("ta").value=deck.map(d=>d.b+" ; "+d.a).join("\n");$("ta").disabled=ro;$("save").disabled=ro;$("lh").textContent=ro?"Choisis une sourate pour modifier sa liste.":LN[lvl]+" · "+deck.length+" mots";const sd=$("sdel");sd.style.display=lvl>=100?"":"none";sd._c=0;sd.textContent="Supprimer cette sourate"}
+function fillTa(){const ro=lvl===0;$("ta").value=deck.map(d=>d.b+" ; "+d.a).join("\n");$("ta").disabled=ro;$("save").disabled=ro;$("lh").textContent=ro?"Choisis une sourate ou un cours pour modifier sa liste.":LN[lvl]+" · "+deck.length+" mots";const sd=$("sdel");sd.style.display=lvl>=100?"":"none";sd._c=0;sd.textContent="Supprimer cette liste"}
 function setLvl(n){lvl=n;try{localStorage.setItem("fc_lvl",n)}catch(e){}setDeck();$("lvs").value=n;ser=sers[n]||0;if(ser>Math.ceil(deck.length/10))ser=0;renderSer();fillTa();reset()}
 function persist(){if(lvl>=100){const c=customs.find(x=>x.id===lvl);if(c){c.words=decks[lvl];svCus()}return}try{localStorage.setItem(lvl===6?"fc_deck_l6":lvl===5?"fc_deck_l5":lvl===4?"fc_deck_l4":lvl===3?"fc_deck_l3":lvl===2?"fc_deck_l2":"fc_deck2",JSON.stringify(decks[lvl]))}catch(e){}}
 function parse(t){return t.split(/\r?\n/).map(l=>l.split(/\t|;|=/).map(s=>s.trim())).filter(a=>a.length>=2&&a[0]&&a[1]).map(a=>({a:a[0],b:a[1]}))}
 function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function reset(){order=shuffle(deck.map((_,k)=>k).filter(k=>!ser||Math.floor(k/10)+1===ser));i=0;rs=0;rt=0;flipped=false;score=0;tot=0;qi=0;drawCard();drawQ()}
 function drawCard(){if(!order.length){$("card").innerHTML="Aucun mot ici<small>Ajoute des mots dans « Ma liste »</small>";$("card").dataset.tag=tagTxt();$("c0").textContent="0 / 0";return}const d=deck[order[i%order.length]];
-$("card").innerHTML="<span class=\"w\">"+(flipped?(rev?d.a:d.b):(rev?d.b:d.a))+"</span><small>"+(flipped?"réponse":"touche pour retourner")+"</small>";
-$("card").dataset.tag=tagTxt();$("card").classList.toggle("back",flipped);$("card").classList.toggle("ar",/[\u0600-\u06FF]/.test($("card").textContent));$("c0").textContent=(i%order.length+1)+" / "+order.length}
+const tx=(flipped?(rev?d.a:d.b):(rev?d.b:d.a));$("card").innerHTML="<span class=\"w\">"+esc(tx)+"</span><small>"+(flipped?"réponse":"touche pour retourner")+"</small>";
+$("card").dataset.tag=tagTxt();$("card").classList.toggle("back",flipped);$("card").classList.toggle("ar",/[\u0600-\u06FF]/.test($("card").textContent));$("card").classList.toggle("long",tx.length>38);$("c0").textContent=(i%order.length+1)+" / "+order.length}
 function nextCard(){i++;flipped=false;drawCard()}
 function drawQ(){answered=false;$("nx").style.display="none";if(deck.length<4){$("q").textContent="Il faut au moins 4 mots pour le QCM.";$("opts").innerHTML="";return}
 const k=order[qi%order.length],d=deck[k];const ans=rev?d.a:d.b;
 const wrong=shuffle(deck.filter((x,j)=>j!==k&&x.a!==d.a&&x.b!==d.b).map(x=>rev?x.a:x.b).filter(x=>x!==ans));
 const ch=shuffle([ans,...[...new Set(wrong)].slice(0,3)]);
-$("q").dataset.tag=tagTxt();$("q").innerHTML="";{const sp=document.createElement("span");sp.className="w";sp.textContent=rev?d.b:d.a;$("q").appendChild(sp)}$("q").classList.toggle("ar",/[\u0600-\u06FF]/.test($("q").textContent));$("opts").innerHTML="";
+$("q").dataset.tag=tagTxt();$("q").innerHTML="";{const sp=document.createElement("span");sp.className="w";sp.textContent=rev?d.b:d.a;$("q").appendChild(sp)}$("q").classList.toggle("ar",/[\u0600-\u06FF]/.test($("q").textContent));$("q").classList.toggle("long",$("q").textContent.length>38);$("opts").innerHTML="";
 ch.forEach(c=>{const b=document.createElement("button");b.className="btn opt";{const sp=document.createElement("span");sp.className="w";sp.textContent=c;b.appendChild(sp)}if(/[\u0600-\u06FF]/.test(c))b.classList.add("ar");
 b.onclick=()=>{if(answered)return;answered=true;tot++;
 if(c===ans){b.classList.add("good");score++}else{b.classList.add("bad");[...$("opts").children].forEach(x=>{if(x.textContent===ans)x.classList.add("good")})}
@@ -374,9 +399,19 @@ $("ltb").onclick=e=>{e.stopPropagation();renderMsg();$("ltp").classList.toggle("
 $("stb").onclick=()=>$("stp").classList.toggle("hide");$("stp").onclick=()=>$("stp").classList.add("hide");
 {const sp=$("spl");$("spa").src=$("av").src;const end=()=>{sp&&sp.remove()};sp.onclick=()=>{sp.classList.add("skip");setTimeout(end,460)};setTimeout(end,7700)}
 {const zv=$("zv");let tm;$("av").onclick=()=>{zv.classList.remove("hide","run");void zv.offsetWidth;zv.classList.add("run");zv._ok=false;clearTimeout(tm);tm=setTimeout(()=>{zv._ok=true},4400)};zv.onclick=()=>{if(zv._ok){zv.classList.add("hide");zv.classList.remove("run")}}}
-$("sadd").onclick=()=>{const nm=$("snm").value.trim(),w=smartParse($("sta").value),sm=$("smsg");if(!nm){sm.textContent="Donne un nom à la sourate.";return}if(Object.values(LN).some(v=>v.toLowerCase()===nm.toLowerCase())){sm.textContent="Une sourate porte déjà ce nom.";return}if(!w.length){sm.textContent="Aucune question/réponse trouvée. Exemple : قُلْ : dis";return}const id=Math.max(99,...customs.map(c=>c.id))+1;customs.push({id,name:nm,words:w,orig:w.map(x=>x.a+" ; "+x.b).join("\n")});decks[id]=w;LN[id]=nm;svCus();renderLvOpts();$("snm").value="";$("sta").value="";sm.textContent="";setLvl(id);$("msg").textContent="« "+nm+" » ajoutée : "+w.length+" mots.";tab(0)};
-$("sdel").onclick=()=>{if(lvl<100)return;const b=$("sdel");if(!b._c){b._c=1;b.textContent="Touche encore pour confirmer";setTimeout(()=>{if(b._c){b._c=0;b.textContent="Supprimer cette sourate"}},4000);return}const id=lvl,nm=LN[id];customs=customs.filter(c=>c.id!==id);delete decks[id];delete LN[id];delete done[id];delete sers[id];saveSt();svCus();lvl=1;renderLvOpts();setLvl(1);$("msg").textContent="« "+nm+" » supprimée."};
-ldS();load();renderLvOpts();setLvl(lvl);renderStats();renderMsg();document.addEventListener("visibilitychange",()=>{if(!document.hidden)renderMsg()});
+$("sadd").onclick=()=>{const nm=$("snm").value.trim(),w=smartParse($("sta").value),sm=$("smsg");if(!nm){sm.textContent="Donne un nom (sourate ou cours).";return}if(Object.values(LN).some(v=>v.toLowerCase()===nm.toLowerCase())){sm.textContent="Ce nom existe déjà dans le menu.";return}if(!w.length){sm.textContent="Aucune question/réponse trouvée. Exemple : قُلْ : dis";return}const id=Math.max(99,...customs.map(c=>c.id))+1;customs.push({id,name:nm,words:w,orig:w.map(x=>x.a+" ; "+x.b).join("\n")});decks[id]=w;LN[id]=nm;if(!svCus()){customs.pop();delete decks[id];delete LN[id];sm.textContent="Le téléphone n’a plus assez de place pour enregistrer cette liste.";return}renderLvOpts();$("snm").value="";$("sta").value="";sm.textContent="";setLvl(id);$("msg").textContent="« "+nm+" » : "+w.length+" questions ajoutées.";tab(0)};
+$("sdel").onclick=()=>{if(lvl<100)return;const b=$("sdel");if(!b._c){b._c=1;b.textContent="Touche encore pour confirmer";setTimeout(()=>{if(b._c){b._c=0;b.textContent="Supprimer cette liste"}},4000);return}const id=lvl,nm=LN[id];customs=customs.filter(c=>c.id!==id);delete decks[id];delete LN[id];delete done[id];delete sers[id];saveSt();svCus();lvl=1;renderLvOpts();setLvl(1);$("msg").textContent="« "+nm+" » a été retiré du menu."};
+
+function bkData(){const o={};try{for(let k=0;k<localStorage.length;k++){const key=localStorage.key(k);if(key&&key.indexOf("fc_")===0&&key!=="fc_lastbk")o[key]=localStorage.getItem(key)}}catch(e){}return{app:"arabe-flashcards",v:1,date:new Date().toISOString(),data:o}}
+function bkLabel(){let t="Aucune sauvegarde faite sur ce téléphone pour l’instant.";try{const l=localStorage.getItem("fc_lastbk");if(l){const n=Math.floor((Date.now()-new Date(l).getTime())/86400000);t="Dernière sauvegarde : "+(n<=0?"aujourd’hui":n===1?"hier":"il y a "+n+" jours")+"."}}catch(e){}$("bkl").textContent=t}
+function bkMark(){try{localStorage.setItem("fc_lastbk",new Date().toISOString())}catch(e){}bkLabel()}
+async function bkSave(){const txt=JSON.stringify(bkData()),d=dstr(new Date()),name="sauvegarde-arabe-"+d+".json",m=$("bkm");try{const f=new File([txt],name,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:"Sauvegarde Arabe"});bkMark();m.textContent="Sauvegarde envoyée. Choisis « Enregistrer dans Fichiers » pour la garder (de préférence dans iCloud Drive).";return}}catch(e){if(e&&e.name==="AbortError"){m.textContent="Sauvegarde annulée.";return}}try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);bkMark();m.textContent="Fichier de sauvegarde téléchargé : "+name}catch(e){try{await navigator.clipboard.writeText(txt);bkMark();m.textContent="Code de sauvegarde copié. Colle-le dans Notes pour le garder."}catch(e2){m.textContent="Impossible de créer la sauvegarde sur cet appareil."}}}
+function bkRestore(txt){const m=$("bkm");let o;try{o=JSON.parse(String(txt).trim())}catch(e){m.textContent="Ce fichier n’est pas une sauvegarde valide.";return}if(!o||o.app!=="arabe-flashcards"||!o.data||typeof o.data!=="object"){m.textContent="Ce fichier n’est pas une sauvegarde de cette appli.";return}const keys=Object.keys(o.data).filter(k=>k.indexOf("fc_")===0&&typeof o.data[k]==="string");if(!keys.length){m.textContent="Cette sauvegarde est vide.";return}try{keys.forEach(k=>localStorage.setItem(k,o.data[k]));localStorage.setItem("fc_lastbk",o.date||new Date().toISOString())}catch(e){m.textContent="Le téléphone n’a pas assez de place pour restaurer.";return}m.textContent="Progression restaurée ✓ Rechargement…";setTimeout(()=>location.reload(),900)}
+$("bks").onclick=bkSave;$("bkr").onclick=()=>$("bkf").click();
+$("bkf").onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>bkRestore(r.result);r.readAsText(f);e.target.value=""};
+$("bkt2").onclick=()=>bkRestore($("bkt").value);
+try{if(!localStorage.getItem("fc_streakfix1")&&Date.now()<Date.UTC(2026,10,22)){const st=JSON.parse(localStorage.getItem("fc_days")||"[]"),d=new Date();for(let k=1;k<=3;k++){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()-k);const ds=dstr(x);if(!st.includes(ds))st.push(ds)}localStorage.setItem("fc_days",JSON.stringify(st));localStorage.setItem("fc_streakfix1","1")}}catch(e){}
+ldS();load();renderLvOpts();setLvl(lvl);renderStats();bkLabel();renderMsg();document.addEventListener("visibilitychange",()=>{if(!document.hidden)renderMsg()});
 </script>
 </body>
 </html>
